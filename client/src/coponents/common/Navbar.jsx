@@ -1,99 +1,112 @@
 
 
 
-import React, { useEffect, useState, useRef } from 'react'
-import logo from "../../assets/Logo/Logo-Full-Light.png"
-import { NavbarLinks } from "../../data/navbar-links"
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { MdMenu, MdClose } from "react-icons/md"
-import { IoIosArrowDropdown, IoIosArrowDropup } from "react-icons/io"
-import Profiledropdown from '../auth/Profiledropdown'
-import { apiconnector } from '../../Services/apiconnector'
-import { categories } from '../../Services/apis'
-import useOnClickOutside from '../../hooks/useOnClickOutside'
+import React, { useEffect, useState, useRef } from 'react';
+import logo from "../../assets/Logo/Logo-Full-Light.png";
+import { NavbarLinks } from "../../data/navbar-links";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { MdMenu, MdClose } from "react-icons/md";
+import { IoIosArrowDropdown, IoIosArrowDropup } from "react-icons/io";
+import Profiledropdown from '../auth/Profiledropdown';
+import { apiconnector } from '../../Services/apiconnector';
+import { categories } from '../../Services/apis';
+import useOnClickOutside from '../../hooks/useOnClickOutside';
 
 const Navbar = () => {
-  const { token } = useSelector((state) => state.auth)
-  const { user } = useSelector((state) => state.profile)
-  const location = useLocation()
-  const navigate = useNavigate()
+  const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [sublinks, setSublinks] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isCatalogOpen, setIsCatalogOpen] = useState(false)
+  const [sublinks, setSublinks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   
-  const catalogRef = useRef(null)
-  const mobileMenuRef = useRef(null)
+  const catalogRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
-  // Close mobile menu when clicking outside
-  useOnClickOutside(mobileMenuRef, () => setIsMobileMenuOpen(false))
-  useOnClickOutside(catalogRef, () => setIsCatalogOpen(false))
+  // Close mobile menu and catalog when clicking outside
+  useOnClickOutside(mobileMenuRef, () => {
+    console.log('Clicked outside mobile menu, closing...');
+    setIsMobileMenuOpen(false);
+    setIsCatalogOpen(false);
+  });
+  useOnClickOutside(catalogRef, () => {
+    console.log('Clicked outside catalog, closing...');
+    setIsCatalogOpen(false);
+  });
 
-  // Close mobile menu when route changes
+  // Close mobile menu and catalog when route changes
   useEffect(() => {
-    setIsMobileMenuOpen(false)
-    setIsCatalogOpen(false)
-  }, [location.pathname])
+    console.log('Route changed, closing menus...');
+    setIsMobileMenuOpen(false);
+    setIsCatalogOpen(false);
+  }, [location.pathname]);
 
-  // Close mobile menu on window resize
+  // Close mobile menu on window resize above 1024px
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
-        setIsMobileMenuOpen(false)
+        console.log('Window resized above 1024px, closing menus...');
+        setIsMobileMenuOpen(false);
+        setIsCatalogOpen(false);
       }
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchCategories = async () => {
     try {
-      setLoading(true)
-      const result = await apiconnector("GET", categories.CATEGORIES_API)
-      setSublinks(result.data.data)
+      setLoading(true);
+      const result = await apiconnector("GET", categories.CATEGORIES_API);
+      setSublinks(result.data.data);
     } catch (error) {
-      console.error("Error while fetching categories:", error.message)
+      console.error("Error while fetching categories:", error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchCategories()
-  }, [])
+    fetchCategories();
+  }, []);
 
   const toggleMobileMenu = (e) => {
-    if (e) {
-      e.preventDefault()
-      e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Toggling mobile menu, current state:', isMobileMenuOpen);
+    setIsMobileMenuOpen(prev => !prev);
+    if (!isMobileMenuOpen) setIsCatalogOpen(false); // Close catalog when opening menu
+  };
+
+  const closeMobileMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Closing mobile menu, current state:', isMobileMenuOpen);
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
     }
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+  };
 
   const toggleCatalog = (e) => {
-    if (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-    setIsCatalogOpen(!isCatalogOpen)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Toggling catalog, current state:', isCatalogOpen);
+    setIsCatalogOpen(prev => !prev);
+  };
 
   const handleCatalogNavigation = (subLink, e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    const catalogPath = `/catalog/${subLink.name.split(" ").join("-").toLowerCase()}`
-    console.log('Navigating to:', catalogPath) // Debug log
-    
-    // Close menus
-    setIsMobileMenuOpen(false)
-    setIsCatalogOpen(false)
-    
-    // Navigate programmatically
-    navigate(catalogPath)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    const catalogPath = `/catalog/${subLink.name.split(" ").join("-").toLowerCase()}`;
+    console.log('Navigating to:', catalogPath);
+    setIsMobileMenuOpen(false);
+    setIsCatalogOpen(false);
+    navigate(catalogPath);
+  };
 
   return (
     <nav className='sticky top-0 z-50 w-full bg-gradient-to-r from-richblack-900 via-richblack-800 to-richblack-900 backdrop-blur-xl border-b border-richblack-600 shadow-2xl'>
@@ -131,7 +144,6 @@ const Navbar = () => {
                       <div className='absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
                     </button>
 
-                    {/* Enhanced Catalog Dropdown */}
                     <div className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-3 w-80 bg-gradient-to-br from-richblack-800 via-richblack-700 to-richblack-800 rounded-xl shadow-2xl border border-richblack-600 transition-all duration-300 ${
                       isCatalogOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-4'
                     }`}>
@@ -195,9 +207,8 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Enhanced Desktop Right Section - Better Spacing */}
+          {/* Desktop Right Section */}
           <div className='hidden lg:flex items-center space-x-6'>
-            {/* Enhanced Auth Section - Better alignment */}
             <div className='flex items-center space-x-4'>
               {token === null ? (
                 <>
@@ -215,7 +226,6 @@ const Navbar = () => {
                   </Link>
                 </>
               ) : (
-                // Enhanced Profile Dropdown Container - Better positioning
                 <div className='relative profile-container'>
                   <div className='p-1.5 bg-richblack-700/40 rounded-lg border border-richblack-600 hover:border-yellow-500/50 transition-all duration-300'>
                     <Profiledropdown />
@@ -225,32 +235,42 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Enhanced Mobile Menu Button & Cart */}
+          {/* Mobile Menu Toggle Buttons */}
           <div className='lg:hidden flex items-center space-x-3'>
-            
-            {/* Enhanced Hamburger Menu Button */}
-            <button
-              onClick={toggleMobileMenu}
-              className={`relative flex items-center justify-center w-10 h-10 text-richblack-100 transition-all duration-300 group overflow-hidden border ${
-                isMobileMenuOpen 
-                  ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-50' 
-                  : 'bg-richblack-700/40 hover:bg-richblack-600/60 border-richblack-600 hover:border-yellow-500/50'
-              } rounded-lg profile-container`}
-              aria-label="Toggle mobile menu"
-            >
-              <div className='relative z-10'>
-                {isMobileMenuOpen ? (
-                  <MdClose className="text-lg transition-transform duration-300 rotate-90" />
-                ) : (
+            {!isMobileMenuOpen ? (
+              <button
+                onClick={toggleMobileMenu}
+                className='relative flex items-center justify-center w-10 h-10 text-richblack-100 transition-all duration-300 group overflow-hidden border bg-richblack-700/40 hover:bg-richblack-600/60 border-richblack-600 hover:border-yellow-500/50 rounded-lg profile-container'
+                aria-label="Open mobile menu"
+              >
+                <div className='relative z-10'>
                   <MdMenu className="text-lg transition-transform duration-300 group-hover:scale-110" />
-                )}
+                </div>
+                <div className='absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+              </button>
+            ) : (
+              <div className='relative z-50'> {/* Increased z-index to ensure clickability */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Close button clicked');
+                    closeMobileMenu(e);
+                  }}
+                  className='relative flex items-center justify-center w-10 h-10 text-yellow-50 transition-all duration-300 group overflow-hidden border bg-yellow-500/20 border-yellow-500/50 rounded-lg profile-container'
+                  aria-label="Close mobile menu"
+                >
+                  <div className='relative z-10'>
+                    <MdClose className="text-lg transition-transform duration-300 rotate-90" />
+                  </div>
+                  <div className='absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                </button>
               </div>
-              <div className='absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-            </button>
+            )}
           </div>
         </div>
 
-        {/* Enhanced Mobile Menu */}
+        {/* Mobile Menu */}
         <div 
           ref={mobileMenuRef}
           className={`lg:hidden bg-gradient-to-br from-richblack-800 via-richblack-700 to-richblack-800 border-t border-richblack-600 transition-all duration-500 ease-in-out backdrop-blur-xl ${
@@ -258,9 +278,7 @@ const Navbar = () => {
           }`}
         >
           <div className='px-6 py-8 space-y-6'>
-            {/* Mobile Navigation Links */}
             <div className='space-y-2'>
-              
               {NavbarLinks.map((link, index) => (
                 <div key={index} className='group mobile-menu-item'>
                   {link.title === "Catalog" ? (
@@ -280,11 +298,10 @@ const Navbar = () => {
                         </div>
                       </button>
                       
-                      {/* Enhanced Mobile Catalog Dropdown */}
                       <div className={`transition-all duration-400 ease-in-out ${
-                        isCatalogOpen ? 'max-h-72 opacity-100 mt-2' : 'max-h-0 opacity-0 overflow-hidden'
+                        isCatalogOpen && isMobileMenuOpen ? 'max-h-72 opacity-100 mt-2' : 'max-h-0 opacity-0 overflow-hidden'
                       }`}>
-                        <div className='bg-richblack-900/50 rounded-xl p-4 ml-4 border border-richblack-600'>
+                        <div ref={catalogRef} className='bg-richblack-900/50 rounded-xl p-4 ml-4 border border-richblack-600'>
                           <div className='max-h-48 overflow-y-auto custom-scrollbar space-y-2'>
                             {loading ? (
                               <div className='flex items-center justify-center py-6'>
@@ -325,8 +342,8 @@ const Navbar = () => {
                           : 'text-richblack-25 hover:bg-richblack-600/50 hover:text-yellow-50'
                       }`}
                       onClick={(e) => {
-                        e.stopPropagation()
-                        setIsMobileMenuOpen(false)
+                        e.stopPropagation();
+                        setIsMobileMenuOpen(false);
                       }}
                     >
                       <div className='flex items-center justify-between relative z-10'>
@@ -342,7 +359,6 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Profile Section for Authenticated Users */}
             {token !== null && (
               <div className='pt-6 border-t border-richblack-600'>
                 <div className='flex items-center justify-center'>
@@ -358,7 +374,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Auth Buttons - Below Navbar */}
       {token === null && (
         <div className='lg:hidden bg-richblack-900 border-b border-richblack-700 py-3 px-4'>
           <div className='flex items-center justify-center gap-4 max-w-sm mx-auto'>
@@ -376,8 +391,7 @@ const Navbar = () => {
         </div>
       )}
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
-
+export default Navbar;
