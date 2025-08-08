@@ -143,7 +143,7 @@ const CourseInformation = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-richblack-800 p-6 rounded-lg border border-richblack-700">
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-richblack-800 p-3 rounded-lg border border-richblack-700">
       <h2 className="text-2xl font-semibold mb-6">Course Information</h2>
 
     
@@ -243,7 +243,7 @@ const CourseInformation = () => {
         <ChipInput
           label="Tags"
           name="courseTags"
-          placeholder="Enter tags and press Enter"
+          placeholder="Enter tags"
           register={register}
           errors={errors}
           setValue={setValue}
