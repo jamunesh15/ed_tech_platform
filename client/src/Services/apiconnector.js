@@ -27,7 +27,7 @@
 import axios from "axios"
 
 export const axiosInstance = axios.create({
-  timeout: 10000, // 10 seconds timeout
+  timeout: 20000, // 10 seconds timeout
   validateStatus: status => status < 500 // Only throw for server errors
 });
 
