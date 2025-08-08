@@ -28,7 +28,7 @@ const otpSchema = new mongoose.Schema({
 async function sendVerificationcode(email  , otp) {
       try {
 
-        let response = await mailsender(email , "verification mail from Studynotion" , otp);
+        let response = await mailsender(email , "verification mail from Studynotion , thankyou for coming on our platform this is varification code for sign up " , otp);
         console.log("MAIL RESPONSE:  ",response);
         
         
